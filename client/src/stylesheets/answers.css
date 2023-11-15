@@ -1,0 +1,59 @@
+
+#answersContainer {
+    padding: 20px;
+    overflow-y: auto;
+    font-size: 18px;
+}
+
+#answersHeader {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+
+#questionBody {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    border-bottom: dotted 2px;
+    padding: 10px 0;
+}
+
+#questionBody > div:first-child {
+    flex: 0 0 100px; /* Fixed width of 40px for the left part */
+    text-align: left;
+}
+
+#questionBody > div:last-child {
+    flex: 0 0 200px; /* Fixed width of 70px for the right part */
+    text-align: right;
+}
+
+#questionBody > div:nth-child(2) {
+    flex: 1; /* This will make the center part take up the remaining width */
+    text-align: left;
+}
+
+
+
+.answer {
+    display: flex;
+    border-bottom: 1px dotted #000;
+    padding: 10px 0;
+    flex-direction: row;
+}
+
+.answerText {
+    width: 85%;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.answerAuthor {
+    /*width: 30%;*/
+    font-size: 14px;
+    color: #777;
+}
