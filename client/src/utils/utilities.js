@@ -1,4 +1,10 @@
+<<<<<<< HEAD
 export function formatDate(date) {
+=======
+export function formatDate(dateString) {
+    const date = new Date(dateString); // Convert to Date object
+
+>>>>>>> 270dbca7fb099feb1665c5355fcdccad74555b38
     const now = new Date();
     const diffInSeconds = Math.floor((now - date) / 1000);
 

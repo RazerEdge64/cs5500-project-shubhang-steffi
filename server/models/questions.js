@@ -1,40 +1,13 @@
-// Question Document Schema
 const mongoose = require('mongoose');
 
 const questionSchema = new mongoose.Schema({
-  qid: {
-    type: String,
-    required: true,
-    unique: true
-  },
-  title: {
-    type: String,
-    required: true
-  },
-  text: {
-    type: String,
-    required: true
-  },
-  tagIds: [{
-    type: String
-  }],
-  askedBy: {
-    type: String,
-    required: true
-  },
-  askDate: {
-    type: Date,
-    required: true
-  },
-  ansIds: [{
-    type: String
-  }],
-  views: {
-    type: Number,
-    default: 0
-  }
+    title: { type: String, required: true },
+    text: { type: String, required: true },
+    tags: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tag' }],
+    answers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Answer' }],
+    asked_by: { type: String, required: true },
+    ask_date_time: { type: Date, required: true },
+    views: { type: Number, default: 0 }
 });
 
-const Question = mongoose.model('Question', questionSchema);
-
-module.exports = Question;
+module.exports = mongoose.model('Question', questionSchema);

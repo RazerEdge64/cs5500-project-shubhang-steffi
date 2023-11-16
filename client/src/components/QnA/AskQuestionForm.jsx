@@ -14,7 +14,11 @@ function AskQuestionForm({ setActiveView, setActiveTab }) {
     const [usernameError, setUsernameError] = useState('');
 
 
+<<<<<<< HEAD
     const handleSubmit = (e) => {
+=======
+    const handleSubmit = async (e) => {
+>>>>>>> 270dbca7fb099feb1665c5355fcdccad74555b38
         e.preventDefault();
 
         const title = document.getElementById('formTitleInput').value;
@@ -114,6 +118,7 @@ function AskQuestionForm({ setActiveView, setActiveTab }) {
                 views: 0
             };
 
+<<<<<<< HEAD
             addQuestion(newQuestion);
 
             // Reset the form
@@ -121,6 +126,22 @@ function AskQuestionForm({ setActiveView, setActiveTab }) {
             setText('');
             setTags('');
             setUsername('');
+=======
+            try {
+                await addQuestion(newQuestion);
+                // Reset the form and change view only after successful addition
+                setTitle('');
+                setText('');
+                setTags('');
+                setUsername('');
+                setActiveView('questions');
+                setActiveTab('questions');
+            } catch (error) {
+                console.error('Error posting question:', error);
+                // Handle error (e.g., show error message to user)
+            }
+
+>>>>>>> 270dbca7fb099feb1665c5355fcdccad74555b38
 
 
             setActiveView('questions');
