@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import {getAllQuestions, getTagById, getAnswerById} from '../../services/dataServices.js';
+import {getAllQuestions, getTagById, getAnswerById, getAllTags} from '../../services/dataServices.js';
 import { formatDate } from '../../utils/utilities.js';
 import logger from "../../logger/logger";
 
 function QuestionsList({ onQuestionClick, searchString, setActiveView }) {
 
     const [questions, setQuestions] = useState([]);
+    const [tags, setTags] = useState([]);
     const [sortType, setSortType] = useState('newest');
 
     const headerName = searchString ? "Search Results" : "All Questions";
@@ -14,8 +15,15 @@ function QuestionsList({ onQuestionClick, searchString, setActiveView }) {
 
 
     useEffect(() => {
-        displayQuestions(sortType);
+        async function fetchData() {
+            const fetchedTags = await getAllTags();
+            setTags(fetchedTags);
+            displayQuestions(sortType);
+        }
+
+        fetchData();
     }, [sortType]);
+
 
     useEffect(() => {
         logger.log("searchString changed: "+ searchString);
@@ -25,19 +33,13 @@ function QuestionsList({ onQuestionClick, searchString, setActiveView }) {
         } else {
             displayQuestions(sortType);
         }
-    }, [searchString]);
+    }, [searchString, tags]);
 
     function handleQuestionClick(question) {
+        console.log("Question clicked:", question.qid);
         question.views++;
-
-        const updatedQuestions = questions.map(q => {
-            if (q.qid === question.qid) {
-                return question;
-            }
-            return q;
-        });
+        const updatedQuestions = questions.map(q => (q.qid === question.qid ? question : q));
         setQuestions(updatedQuestions);
-
         if (onQuestionClick) {
             onQuestionClick(question.qid);
         }
@@ -60,9 +62,9 @@ function QuestionsList({ onQuestionClick, searchString, setActiveView }) {
                         </div>
                     </div>
                     <div className="postTags">
-                        {question.tagIds.map(tagId => {
-                            const tag = getTagById(tagId);
-                            return <span key={tagId}>{tag.name}</span>;
+                    {question.tagIds.map(tagId => {
+                            const tag = tags.find(t => t.tid === tagId);
+                            return tag ? <span key={tagId}>{tag.name}</span> : null;
                         })}
                     </div>
                 </div>
@@ -103,26 +105,37 @@ function QuestionsList({ onQuestionClick, searchString, setActiveView }) {
         });
     }
 
-    function searchAndDisplayQuestions(searchString) {
+    async function searchAndDisplayQuestions(searchString) {
         const tags = searchString.match(/\[([^\]]+)\]/g) || [];
         const words = searchString.replace(/\[([^\]]+)\]/g, '').trim().split(/\s+/).filter(word => word);
-
-        const filteredQuestions = getAllQuestions().filter(question => {
-            const hasMatchingTag = tags.some(tag => {
+    
+        const allQuestions = await getAllQuestions();
+    
+        // Map each question to a promise that resolves to true or false
+        const questionPromises = allQuestions.map(async question => {
+            const hasMatchingTag = await Promise.all(tags.map(async tag => {
                 const tagName = tag.slice(1, -1).toLowerCase();
-                return question.tagIds.some(tagId => getTagById(tagId).name.toLowerCase() === tagName);
-            });
-
+                return Promise.all(question.tagIds.map(async tagId => {
+                    const tag = await getTagById(tagId);
+                    return tag.name.toLowerCase() === tagName;
+                })).then(results => results.some(result => result));
+            })).then(results => results.some(result => result));
+    
             const hasMatchingWord = words.some(word =>
                 question.title.toLowerCase().includes(word.toLowerCase()) ||
                 question.text.toLowerCase().includes(word.toLowerCase())
             );
-
+    
             return hasMatchingTag || hasMatchingWord;
         });
-
+    
+        // Wait for all promises to resolve and filter the questions
+        const filteredQuestions = (await Promise.all(questionPromises))
+            .map((matches, index) => matches ? allQuestions[index] : null)
+            .filter(question => question !== null);
+    
         const sortedQuestions = filteredQuestions.sort((a, b) => new Date(b.askDate) - new Date(a.askDate));
-
+    
         setQuestions(sortedQuestions);
     }
 
