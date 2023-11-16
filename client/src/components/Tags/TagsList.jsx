@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 // import React, {useState, useEffect} from 'react';
 // import {getAllQuestions, getAllTags, getTagById} from '../../services/dataServices.js';
 //
@@ -46,20 +44,11 @@
 //
 // export default TagsList;
 
->>>>>>> 270dbca7fb099feb1665c5355fcdccad74555b38
 import React, {useState, useEffect} from 'react';
 import {getAllQuestions, getAllTags, getTagById} from '../../services/dataServices.js';
 
 function TagsList({onTagClick, setActiveView}) {
     const [tags, setTags] = useState([]);
-<<<<<<< HEAD
-
-    useEffect(() => {
-        const allTags = getAllTags();
-        setTags(allTags);
-    }, []);
-
-=======
     const [questions, setQuestions] = useState([]);
 
     useEffect(() => {
@@ -82,7 +71,6 @@ function TagsList({onTagClick, setActiveView}) {
         ).length;
     };
 
->>>>>>> 270dbca7fb099feb1665c5355fcdccad74555b38
     return (
         <div>
             <div className="header" style={{flexDirection: 'row'}}>
@@ -93,26 +81,6 @@ function TagsList({onTagClick, setActiveView}) {
                     <h3>All Tags</h3>
                 </div>
                 <div>
-<<<<<<< HEAD
-                    <button className="blue-button" id="askQuestionBtn" onClick={() => setActiveView('askQuestion')}>Ask a Question</button>
-
-                </div>
-            </div>
-            <div className="tags-grid">
-                {tags.map(tag => {
-                    const questionsWithTag = getAllQuestions().filter(question =>
-                        question.tagIds.some(tagId => getTagById(tagId).name === tag.name)
-                    );
-                    return (
-                        <div className="tagNode tag-card" key={tag.tid}>
-                            <a href="#" onClick={() => onTagClick(tag.name)}>{tag.name}</a>
-                            <div>{questionsWithTag.length} questions</div>
-                        </div>
-                    );
-                })}
-            </div>
-
-=======
                     <button className="blue-button" id="askQuestionBtn" onClick={() => setActiveView('askQuestion')}>Ask
                         a Question
                     </button>
@@ -126,13 +94,8 @@ function TagsList({onTagClick, setActiveView}) {
                     </div>
                 ))}
             </div>
->>>>>>> 270dbca7fb099feb1665c5355fcdccad74555b38
         </div>
     );
 }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 270dbca7fb099feb1665c5355fcdccad74555b38
 export default TagsList;

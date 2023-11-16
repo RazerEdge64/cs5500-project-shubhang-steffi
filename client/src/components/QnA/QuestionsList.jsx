@@ -76,28 +76,6 @@ function QuestionsList({ onQuestionClick, searchString, setActiveView }) {
 
 
     function displayQuestions(sortType) {
-<<<<<<< HEAD
-        let sortedQuestions = [...getAllQuestions()];
-
-        switch (sortType) {
-            case 'newest':
-                sortedQuestions.sort((a, b) => b.askDate - a.askDate);
-                break;
-            case 'active':
-                sortedQuestions.sort((a, b) => {
-                    const lastAnswerA = a.ansIds.map(id => getAnswerById(id)).sort((a, b) => b.ansDate - a.ansDate)[0] || { ansDate: a.askDate };
-                    const lastAnswerB = b.ansIds.map(id => getAnswerById(id)).sort((a, b) => b.ansDate - a.ansDate)[0] || { ansDate: b.askDate };
-                    return lastAnswerB.ansDate - lastAnswerA.ansDate;
-                });
-                break;
-
-            case 'unanswered':
-                sortedQuestions = sortedQuestions.filter(q => q.ansIds.length === 0);
-                break;
-        }
-
-        setQuestions(sortedQuestions);
-=======
         getAllQuestions().then(allQuestions => {
             let sortedQuestions = [...allQuestions];
 
@@ -123,7 +101,6 @@ function QuestionsList({ onQuestionClick, searchString, setActiveView }) {
         }).catch(error => {
             console.error('Error in displayQuestions: ', error);
         });
->>>>>>> 270dbca7fb099feb1665c5355fcdccad74555b38
     }
 
     function searchAndDisplayQuestions(searchString) {
