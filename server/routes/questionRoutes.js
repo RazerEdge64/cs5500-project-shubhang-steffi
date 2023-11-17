@@ -32,7 +32,13 @@ router.get('/:qid', async (req, res) => {
             return res.status(404).send('Question not found');
         }
         // Transform the question object as needed
-        res.json(question);
+        const answerCount = question.answers ? question.answers.length : 0;
+
+        // Include answer count in the response
+        res.json({
+            question: question,
+            answerCount: answerCount
+        });
     } catch (error) {
         console.log("Error in fetching question by ID.", error);
         res.status(500).send(error);
@@ -72,6 +78,25 @@ router.post('/increment-views/:qid', async (req, res) => {
         res.status(500).send(error);
     }
 });
+
+// Get a question by ID with the count of answers
+router.get('/:questionId/with-answers-count', async (req, res) => {
+    try {
+        const questionId = req.params.questionId;
+        const question = await Question.findById(questionId).populate('answers');
+        const answerCount = question.answers ? question.answers.length : 0;
+
+        res.json({
+            question: question,
+            answerCount: answerCount
+        });
+    } catch (error) {
+        console.log("Error in getting question with answer count:", error);
+        res.status(500).send(error);
+    }
+});
+
+module.exports = router;
 
 
 module.exports = router;

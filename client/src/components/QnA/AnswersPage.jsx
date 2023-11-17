@@ -54,7 +54,7 @@ function AnswersPage({ questionId, setActiveView }) {
             {question && (
                 <div id="answersHeader" className="header">
                     <div>
-                        <h2>{question.ansIds?.length} answers</h2>
+                        <h2>{question.answerCount} answers</h2>
                     </div>
                     <div>
                         <h3>{question.title}</h3>

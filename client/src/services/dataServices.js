@@ -17,15 +17,31 @@ export async function getAllQuestions() {
 //     return data.questions.find(question => question.qid === qid);
 // }
 
+// export async function getQuestionById(qid) {
+//     try {
+//         const response = await axios.get(`http://localhost:8000/questions/${qid}`);
+//         return response.data;
+//     } catch (error) {
+//         console.error('Error fetching question by ID: ', error);
+//         return null;
+//     }
+// }
 export async function getQuestionById(qid) {
     try {
         const response = await axios.get(`http://localhost:8000/questions/${qid}`);
-        return response.data;
+        const data = response.data;
+
+        // Assuming the response structure is { question: {...}, answerCount: number }
+        return data.question ? {
+            ...data.question,
+            answerCount: data.answerCount
+        } : null;
     } catch (error) {
         console.error('Error fetching question by ID: ', error);
         return null;
     }
 }
+
 
 export async function incrementQuestionViews(qid) {
     try {
@@ -228,3 +244,5 @@ export async function getQuestionCountForTag(tagId) {
         return 0; // or handle the error as appropriate
     }
 }
+
+
