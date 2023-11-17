@@ -28,6 +28,14 @@ export async function getQuestionById(qid) {
     }
 }
 
+export async function incrementQuestionViews(qid) {
+    try {
+        await axios.post(`http://localhost:8000/questions/increment-views/${qid}`);
+        console.log("Views incremented for question:", qid);
+    } catch (error) {
+        console.error('Error incrementing views:', error);
+    }
+}
 
 // export function getAllAnswers() {
 //     // logger.log("Fetching all the answers");
@@ -165,8 +173,11 @@ export function mapTagsToIds(tags) {
 //     }
 // }
 export async function addAnswer(answer, currentQuestion) {
+
+    console.log("from addanswer - ",currentQuestion);
     try {
-        const response = await axios.post(`http://localhost:8000/answers/add/${currentQuestion.qid}`, answer);
+        const response = await axios.post(`http://localhost:8000/answers/add/${currentQuestion._id}`, answer);
+        console.log(response);
         return response.data;
     } catch (error) {
         console.error('Error adding answer: ', error);

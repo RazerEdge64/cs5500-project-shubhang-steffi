@@ -32,11 +32,16 @@ function App() {
         setActiveView('answers');
     };
 
-    const handleNewAnswer = (newAnswer) => {
-        logger.log('Handling new answer:'+ newAnswer);
-        addAnswer(newAnswer, currentQuestion);
-        setAnswers([...answers, newAnswer]);
-        setActiveView('answers');
+    const handleNewAnswer = async (newAnswer) => {
+        try {
+            logger.log('Handling new answer:'+ newAnswer);
+            console.log("from app",currentQuestion);
+            await addAnswer(newAnswer, currentQuestion);
+            setAnswers([...answers, newAnswer]);
+            setActiveView('answers');
+        } catch (error) {
+            logger.log(error);
+        }
     };
 
     const handleSidebarClick = (view) => {

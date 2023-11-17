@@ -21,6 +21,28 @@ router.get('/', async (req, res) => {
     }
 });
 
+// Get an answer by ID
+router.get('/:aid', async (req, res) => {
+    try {
+        const answer = await Answer.findById(req.params.aid);
+        if (!answer) {
+            return res.status(404).send('Answer not found');
+        }
+
+        const transformedAnswer = {
+            aid: answer._id.toString(), // Convert ObjectId to string
+            text: answer.text,
+            ansBy: answer.ans_by,
+            ansDate: answer.ans_date_time
+        };
+
+        res.json(transformedAnswer);
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
+
 // Add an answer to a question
 router.post('/add/:questionId', async (req, res) => {
     try {

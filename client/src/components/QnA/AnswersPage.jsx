@@ -4,20 +4,40 @@ import { formatDate } from '../../utils/utilities.js';
 import logger from "../../logger/logger";
 
 function AnswersPage({ questionId, setActiveView }) {
+    console.log("questionID - ",questionId);
     const [question, setQuestion] = useState(null);
     const [answers, setAnswers] = useState([]);
 
     useEffect(() => {
-        const fetchedQuestion = getQuestionById(questionId);
-        setQuestion(fetchedQuestion);
+        console.log(answers);
+    }, [answers]);
 
-        const fetchedAnswers = fetchedQuestion.ansIds.map(id => getAnswerById(id));
-        fetchedAnswers.sort((a, b) => b.ansDate - a.ansDate);
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                const fetchedQuestion = await getQuestionById(questionId);
+                console.log(fetchedQuestion);
+                if (fetchedQuestion) {
+                    setQuestion(fetchedQuestion);
 
-        logger.log("Fetched answers for question " + questionId + ":" + JSON.stringify(fetchedAnswers));
+                    // Check if answers are already included in the fetched question
+                    if (fetchedQuestion.answers && fetchedQuestion.answers.length > 0) {
+                        // Sort the answers by date
+                        const sortedAnswers = fetchedQuestion.answers.sort((a, b) => new Date(b.ans_date_time) - new Date(a.ans_date_time));
+                        setAnswers(sortedAnswers);
+                    }
 
-        setAnswers(fetchedAnswers);
+                    logger.log("Fetched answers for question " + questionId + ":" + JSON.stringify(fetchedQuestion.answers));
+                }
+            } catch (error) {
+                console.error('Error fetching question or answers:', error);
+            }
+        }
+
+        fetchData();
     }, [questionId]);
+
+
 
     const handleAnswerClick = () => {
         setActiveView('answerForm');
@@ -34,7 +54,7 @@ function AnswersPage({ questionId, setActiveView }) {
             {question && (
                 <div id="answersHeader" className="header">
                     <div>
-                        <h2>{question.ansIds.length} answers</h2>
+                        <h2>{question.ansIds?.length} answers</h2>
                     </div>
                     <div>
                         <h3>{question.title}</h3>
@@ -56,25 +76,25 @@ function AnswersPage({ questionId, setActiveView }) {
                     <div className="lastActivity">
                         <p>
                             <span>{question.askedBy}</span><br />
-                            asked {formatDate(new Date(question.askDate))}
+                            asked {formatDate(new Date(question.ask_date_time))}
                         </p>
                     </div>
                 </div>
             )}
 
             <div id="answersContainer">
-                {answers.map(answer => (
+                {answers && answers.map(answer => (
                     <div className="answer" key={answer.aid}>
                         <div className="answerText">
 
                             <div dangerouslySetInnerHTML={{ __html: processHyperlinks(answer.text) }} />
                         </div>
                         <div className="answerAuthor">
-                            {answer.ansBy} <br /> answered on {formatDate(answer.ansDate)}
+                            {answer.ans_by} <br /> answered on {formatDate(answer.ans_date_time)}
                         </div>
                     </div>
                 ))}
-                {answers.length === 0 && <p>No answers available.</p>}
+                {answers && answers.length === 0 && <p>No answers available.</p>}
                 <button className="blue-button" id="answerQuestionBtn" style={{ marginTop: '20px' }} onClick={handleAnswerClick}>
                     Answer Question
                 </button>

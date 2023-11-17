@@ -53,5 +53,25 @@ router.post('/', async (req, res) => {
 });
 
 
+// Increment views of a question
+router.post('/increment-views/:qid', async (req, res) => {
+    try {
+        const questionId = req.params.qid;
+        const question = await Question.findById(questionId);
+
+        if (!question) {
+            return res.status(404).send('Question not found');
+        }
+
+        question.views += 1; // Increment the views
+        await question.save(); // Save the updated question
+
+        res.status(200).send({ message: 'Views incremented successfully' });
+    } catch (error) {
+        console.log("Error in incrementing question views:", error);
+        res.status(500).send(error);
+    }
+});
+
 
 module.exports = router;

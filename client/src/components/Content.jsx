@@ -53,15 +53,20 @@ function Content({
                 <AnswersPage
                     questionId={selectedQuestionId}
                     answers={answers}
-                    setActiveView={(view) => {
+                    setActiveView={async (view) => {
                         if (view === 'answerForm') {
-                            const question = getQuestionById(selectedQuestionId);
-                            setCurrentQuestion(question);
+                            try {
+                                const question = await getQuestionById(selectedQuestionId);
+                                setCurrentQuestion(question);
+                            } catch (error) {
+                                console.error('Error fetching question:', error);
+                            }
                         }
                         setActiveView(view);
                     }}
                 />
             )}
+
             {activeView === 'answerForm' && (
                 <AnswerQuestionForm
                     currentQuestion={currentQuestion}

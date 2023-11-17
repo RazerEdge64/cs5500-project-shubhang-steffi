@@ -52,16 +52,29 @@ function AnswerQuestionForm({ onAnswerSubmit }) {
 
         if (valid) {
             const newAnswer = {
-                aid: 'a' + (getAllAnswers().length + 1),
+                // aid: 'a' + (getAllAnswers().length + 1),
                 text: answerText,
-                ansBy: username,
-                ansDate: new Date()
+                ans_by: username,
+                ans_date_time: new Date()
             };
 
-            onAnswerSubmit(newAnswer);
+            // onAnswerSubmit(newAnswer);
+            //
+            // setUsername('');
+            // setAnswerText('');
+            onAnswerSubmit(newAnswer)
+                .then(() => {
+                    // Handle successful submission
+                    setUsername('');
+                    setAnswerText('');
+                    // Maybe show a success message or navigate to another page
+                })
+                .catch(error => {
+                    // Handle errors
+                    console.error('Error submitting answer:', error);
+                    // Maybe show an error message
+                });
 
-            setUsername('');
-            setAnswerText('');
         }
     };
 

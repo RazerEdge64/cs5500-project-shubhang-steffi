@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import {getAllQuestions, getTagById, getAnswerById} from '../../services/dataServices.js';
+import {getAllQuestions, getTagById, getAnswerById, incrementQuestionViews} from '../../services/dataServices.js';
 import { formatDate } from '../../utils/utilities.js';
 import logger from "../../logger/logger";
+import axios from "axios";
 
 function QuestionsList({ onQuestionClick, searchString, setActiveView }) {
 
@@ -27,12 +28,47 @@ function QuestionsList({ onQuestionClick, searchString, setActiveView }) {
         }
     }, [searchString]);
 
-    function handleQuestionClick(question) {
-        question.views++;
+    // function handleQuestionClick(question) {
+    //
+    //     console.log("handle Question");
+    //     question.views++;
+    //
+    //     const updatedQuestions = questions.map(q => {
+    //         if (q.qid === question.qid) {
+    //             return question;
+    //         }
+    //         return q;
+    //     });
+    //     setQuestions(updatedQuestions);
+    //
+    //     if (onQuestionClick) {
+    //         onQuestionClick(question.qid);
+    //     }
+    // }
+    // async function handleQuestionClick(question) {
+    //     // ... existing code for handling question click ...
+    //
+    //     try {
+    //         // Call the API to increment the question views
+    //         await axios.post(`http://localhost:8000/questions/increment-views/${question.qid}`);
+    //         console.log("Views incremented for question:", question.qid);
+    //
+    //         // Optionally, update the UI to reflect the new view count
+    //         // This could involve re-fetching the question data or incrementing the view count in the state
+    //     } catch (error) {
+    //         console.error('Error incrementing views:', error);
+    //     }
+    // }
+    async function handleQuestionClick(question) {
+        console.log("handle Question");
 
+        // Call the function to increment views
+        await incrementQuestionViews(question.qid);
+
+        // Update the local state to reflect the new view count
         const updatedQuestions = questions.map(q => {
             if (q.qid === question.qid) {
-                return question;
+                return { ...question, views: question.views + 1 };
             }
             return q;
         });
@@ -42,6 +78,7 @@ function QuestionsList({ onQuestionClick, searchString, setActiveView }) {
             onQuestionClick(question.qid);
         }
     }
+
 
 
 
@@ -103,15 +140,43 @@ function QuestionsList({ onQuestionClick, searchString, setActiveView }) {
         });
     }
 
-    function searchAndDisplayQuestions(searchString) {
+    // function searchAndDisplayQuestions(searchString) {
+    //     const tags = searchString.match(/\[([^\]]+)\]/g) || [];
+    //     const words = searchString.replace(/\[([^\]]+)\]/g, '').trim().split(/\s+/).filter(word => word);
+    //
+    //     const filteredQuestions = getAllQuestions().filter(question => {
+    //         const hasMatchingTag = tags.some(tag => {
+    //             const tagName = tag.slice(1, -1).toLowerCase();
+    //             return question.tagIds.some(tagId => getTagById(tagId).name.toLowerCase() === tagName);
+    //         });
+    //
+    //         const hasMatchingWord = words.some(word =>
+    //             question.title.toLowerCase().includes(word.toLowerCase()) ||
+    //             question.text.toLowerCase().includes(word.toLowerCase())
+    //         );
+    //
+    //         return hasMatchingTag || hasMatchingWord;
+    //     });
+    //
+    //     const sortedQuestions = filteredQuestions.sort((a, b) => new Date(b.askDate) - new Date(a.askDate));
+    //
+    //     setQuestions(sortedQuestions);
+    // }
+    async function searchAndDisplayQuestions(searchString) {
         const tags = searchString.match(/\[([^\]]+)\]/g) || [];
         const words = searchString.replace(/\[([^\]]+)\]/g, '').trim().split(/\s+/).filter(word => word);
 
-        const filteredQuestions = getAllQuestions().filter(question => {
-            const hasMatchingTag = tags.some(tag => {
+        const allQuestions = await getAllQuestions();
+
+        // Map each question to a promise that resolves to true or false
+        const questionPromises = allQuestions.map(async question => {
+            const hasMatchingTag = await Promise.all(tags.map(async tag => {
                 const tagName = tag.slice(1, -1).toLowerCase();
-                return question.tagIds.some(tagId => getTagById(tagId).name.toLowerCase() === tagName);
-            });
+                return Promise.all(question.tagIds.map(async tagId => {
+                    const tag = await getTagById(tagId);
+                    return tag.name.toLowerCase() === tagName;
+                })).then(results => results.some(result => result));
+            })).then(results => results.some(result => result));
 
             const hasMatchingWord = words.some(word =>
                 question.title.toLowerCase().includes(word.toLowerCase()) ||
@@ -121,10 +186,16 @@ function QuestionsList({ onQuestionClick, searchString, setActiveView }) {
             return hasMatchingTag || hasMatchingWord;
         });
 
+        // Wait for all promises to resolve and filter the questions
+        const filteredQuestions = (await Promise.all(questionPromises))
+            .map((matches, index) => matches ? allQuestions[index] : null)
+            .filter(question => question !== null);
+
         const sortedQuestions = filteredQuestions.sort((a, b) => new Date(b.askDate) - new Date(a.askDate));
 
         setQuestions(sortedQuestions);
     }
+
 
     return (
         <div>
