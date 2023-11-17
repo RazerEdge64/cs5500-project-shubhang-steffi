@@ -1,120 +1,70 @@
 import React, { useState } from 'react';
-import {addQuestion, mapTagsToIds} from '../../services/dataServices.js';
+import { addQuestion, mapTagsToIds } from '../../services/dataServices.js';
 import logger from "../../logger/logger";
 
 function AskQuestionForm({ setActiveView, setActiveTab }) {
+    // Use React state for form fields
     const [title, setTitle] = useState('');
     const [text, setText] = useState('');
     const [tags, setTags] = useState('');
     const [username, setUsername] = useState('');
 
+    // Use React state for error messages
     const [titleError, setTitleError] = useState('');
     const [textError, setTextError] = useState('');
     const [tagError, setTagError] = useState('');
     const [usernameError, setUsernameError] = useState('');
 
-
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const title = document.getElementById('formTitleInput').value;
-        const text = document.getElementById('formTextInput').value;
-        const tags = document.getElementById('formTagInput').value.split(' ');
-        const username = document.getElementById('formUsernameInput').value;
+        // Validate form fields
+        let isValid = true;
+        setTitleError('');
+        setTextError('');
+        setTagError('');
+        setUsernameError('');
 
-        logger.log(tags);
-
-        let valid = true;
-
-        // Title validation
         if (!title) {
-            valid = false;
             setTitleError('Title cannot be empty');
+            isValid = false;
         } else if (title.length > 100) {
-            valid = false;
             setTitleError('Title cannot be more than 100 characters');
-        } else {
-            setTitleError('');
+            isValid = false;
         }
 
-        // Text validation
         if (!text) {
-            valid = false;
             setTextError('Question text cannot be empty');
-        } else {
-            const regex = /\s*\[([^\]]+)\]\s*\(\s*([^)]+)\s*\)/g;
-
-            const matches = text.match(regex);
-
-            logger.log('Input Text: '+text);
-            logger.log('Matches: '+matches);
-
-
-            let invalidLinkFound = false;
-
-            if (matches) {
-                for (const match of matches) {
-                    const linkText = match.match(/\[([^\]]+)\]/)[1];
-                    const linkTarget = match.match(/\(([^)]+)\)/)[1];
-
-                    logger.log('Link Text: '+ linkText);
-                    logger.log('Link Target: ' + linkTarget);
-
-
-                    if (!linkText.trim() || !linkTarget.trim() || !linkTarget.startsWith('https://')) {
-                        invalidLinkFound = true;
-                        break;
-                    }
-                }
-            }
-
-            if (invalidLinkFound) {
-                valid = false;
-                setTextError('Invalid hyperlink');
-            } else {
-                setTextError('');
-            }
+            isValid = false;
         }
 
-
-        // Tags validation
-        // const tagsArray = tags.split(' ');
-        const tagsArray = tags;
+        const tagsArray = tags.split(' ').filter(tag => tag); // Filter out empty strings
         if (tagsArray.length > 5) {
-            valid = false;
             setTagError('Cannot have more than 5 tags');
+            isValid = false;
         } else if (tagsArray.some(tag => tag.length > 20)) {
-            valid = false;
-            setTagError('New tag length cannot be more than 20');
-        } else {
-            setTagError('');
+            setTagError('Tag length cannot be more than 20');
+            isValid = false;
         }
 
-        // Username validation
         if (!username) {
-            valid = false;
             setUsernameError('Username cannot be empty');
-        } else {
-            setUsernameError('');
+            isValid = false;
         }
 
-
-        if (valid) {
-
-            const mappedTagIds = mapTagsToIds(tags);
-
-            const newQuestion = {
-                qid: 'q' + (new Date().getTime()),
-                title: title,
-                text: text,
-                tagIds: mappedTagIds,
-                askedBy: username,
-                askDate: new Date(),
-                ansIds: [],
-                views: 0
-            };
-
+        if (isValid) {
             try {
+                const mappedTagIds = await mapTagsToIds(tagsArray); // Ensure this function is async
+                const newQuestion = {
+                    title: title,           // Collected from form
+                    text: text,             // Collected from form
+                    tags: mappedTagIds,     // Result from mapTagsToIds function
+                    answers: [],            // Assuming no answers at the time of creation
+                    asked_by: username,     // Collected from form
+                    ask_date_time: new Date(),
+                    views: 0  
+                };
+
                 await addQuestion(newQuestion);
                 // Reset the form and change view only after successful addition
                 setTitle('');
@@ -125,16 +75,9 @@ function AskQuestionForm({ setActiveView, setActiveTab }) {
                 setActiveTab('questions');
             } catch (error) {
                 console.error('Error posting question:', error);
-                // Handle error (e.g., show error message to user)
+                // Display a generic error message or specific based on error content
             }
-
-
-
-            setActiveView('questions');
-            setActiveTab('questions');
         }
-
-
     };
 
     return (

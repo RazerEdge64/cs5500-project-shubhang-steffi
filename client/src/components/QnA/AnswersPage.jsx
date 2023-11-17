@@ -7,30 +7,40 @@ function AnswersPage({ questionId, setActiveView }) {
     const [question, setQuestion] = useState(null);
     const [answers, setAnswers] = useState([]);
 
+    // useEffect(() => {
+    //     const fetchedQuestion = getQuestionById(questionId);
+    //     setQuestion(fetchedQuestion);
+    //
+    //     const fetchedAnswers = fetchedQuestion.ansIds.map(id => getAnswerById(id));
+    //     fetchedAnswers.sort((a, b) => b.ansDate - a.ansDate);
+    //
+    //     logger.log("Fetched answers for question " + questionId + ":" + JSON.stringify(fetchedAnswers));
+    //
+    //     setAnswers(fetchedAnswers);
+    // }, [questionId]);
     useEffect(() => {
         async function fetchData() {
             try {
                 const fetchedQuestion = await getQuestionById(questionId);
-                if (fetchedQuestion && fetchedQuestion.ansIds) {
+                if (fetchedQuestion) {
                     setQuestion(fetchedQuestion);
-    
-                    const answerPromises = fetchedQuestion.ansIds.map(id => getAnswerById(id));
-                    const fetchedAnswers = await Promise.all(answerPromises);
-                    fetchedAnswers.sort((a, b) => new Date(b.ansDate) - new Date(a.ansDate));
-    
+
+                    const fetchedAnswersPromises = fetchedQuestion.ansIds.map(id => getAnswerById(id));
+                    const fetchedAnswers = await Promise.all(fetchedAnswersPromises);
+                    fetchedAnswers.sort((a, b) => b.ansDate - a.ansDate);
+
+                    logger.log("Fetched answers for question " + questionId + ":" + JSON.stringify(fetchedAnswers));
+
                     setAnswers(fetchedAnswers);
-                } else {
-                    // Handle the situation where fetchedQuestion is not as expected
-                    console.log("Question data is not in expected format or is missing");
                 }
             } catch (error) {
-                console.error("Error fetching data: ", error);
+                console.error('Error fetching question or answers:', error);
             }
         }
-    
+
         fetchData();
     }, [questionId]);
-    
+
 
     const handleAnswerClick = () => {
         setActiveView('answerForm');
@@ -47,7 +57,7 @@ function AnswersPage({ questionId, setActiveView }) {
             {question && (
                 <div id="answersHeader" className="header">
                     <div>
-                        <h2>{question.ansIds.length} answers</h2>
+                        <h2>{question.ansIds?.length} answers</h2>
                     </div>
                     <div>
                         <h3>{question.title}</h3>
@@ -76,7 +86,7 @@ function AnswersPage({ questionId, setActiveView }) {
             )}
 
             <div id="answersContainer">
-                {answers.map(answer => (
+                {answers?.map(answer => (
                     <div className="answer" key={answer.aid}>
                         <div className="answerText">
 
@@ -87,7 +97,7 @@ function AnswersPage({ questionId, setActiveView }) {
                         </div>
                     </div>
                 ))}
-                {answers.length === 0 && <p>No answers available.</p>}
+                {answers && answers.length === 0 && <p>No answers available.</p>}
                 <button className="blue-button" id="answerQuestionBtn" style={{ marginTop: '20px' }} onClick={handleAnswerClick}>
                     Answer Question
                 </button>
