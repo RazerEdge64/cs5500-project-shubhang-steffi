@@ -1,5 +1,4 @@
 // import data from '../models/model.js';
-import logger from '../logger/logger.js';
 import axios from "axios";
 
 export async function getAllQuestions() {
@@ -117,7 +116,7 @@ export async function getTagByName(tagName) {
 //     data.questions.push(question);
 // }
 export async function addQuestion(question) {
-    console.log(question);
+    console.log("dataservices question - ",question);
     try {
         console.log(question);
         const response = await axios.post('http://localhost:8000/questions', question);
@@ -127,34 +126,68 @@ export async function addQuestion(question) {
     }
 }
 
-/**
- * This method is used to map all tag names from a question to their respective ids.
- * @param tags  represents the tag names.
- * @returns {*[]}   returns a list of tag ids.
- */
-export function mapTagsToIds(tags) {
+// /**
+//  * This method is used to map all tag names from a question to their respective ids.
+//  * @param tags  represents the tag names.
+//  * @returns {*[]}   returns a list of tag ids.
+//  */
+// export function mapTagsToIds(tags) {
+//     const tagIds = [];
+//
+//     tags.forEach(tagName => {
+//
+//         const existingTag = getTagByName(tagName);
+//
+//         if (existingTag) {
+//
+//             tagIds.push(existingTag.tid);
+//         } else {
+//             const newTagId = 't' + (getAllTags().length + 1);
+//             getAllTags().push({
+//                 tid: newTagId,
+//                 name: tagName
+//             });
+//             tagIds.push(newTagId);
+//         }
+//     });
+//
+//     return tagIds;
+//
+// }
+export async function mapTagsToIds(tags) {
     const tagIds = [];
 
-    tags.forEach(tagName => {
+    for (const tagName of tags) {
+        console.log("mapTagsToIds tagname - ",tagName);
+        try {
+            // Check if the tag exists
+            let response;
+            try {
+                response = await axios.get(`/tags/name/${tagName}`);
+            } catch (error) {
+                if (error.response && error.response.status === 404) {
+                    // Tag doesn't exist, so create it
+                    console.log("tag doesn't exist, creating new one");
+                    response = await axios.post('http://localhost:8000/tags', { name: tagName });
 
-        const existingTag = getTagByName(tagName);
+                } else {
+                    // Other errors
+                    throw error;
+                }
+            }
 
-        if (existingTag) {
-
-            tagIds.push(existingTag.tid);
-        } else {
-            const newTagId = 't' + (getAllTags().length + 1);
-            getAllTags().push({
-                tid: newTagId,
-                name: tagName
-            });
-            tagIds.push(newTagId);
+            const tag = response.data;
+            tagIds.push(tag.tid);
+        } catch (error) {
+            console.error('Error in mapTagsToIds: ', error);
+            // Handle the error according to your application's needs
         }
-    });
+    }
 
     return tagIds;
-
 }
+
+
 
 /**
  * This method is used to add an answer to the respective question.
@@ -182,5 +215,16 @@ export async function addAnswer(answer, currentQuestion) {
     } catch (error) {
         console.error('Error adding answer: ', error);
         return null;
+    }
+}
+
+
+export async function getQuestionCountForTag(tagId) {
+    try {
+        const response = await axios.get(`http://localhost:8000/tags/${tagId}/questions/count`);
+        return response.data.count;
+    } catch (error) {
+        console.error('Error fetching question count for tag: ', error);
+        return 0; // or handle the error as appropriate
     }
 }

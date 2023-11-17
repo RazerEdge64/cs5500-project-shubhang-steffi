@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Tag = require('../models/tags');
+const Question = require('../models/questions');
 
 // Get all tags with transformed response
 router.get('/', async (req, res) => {
@@ -17,6 +18,37 @@ router.get('/', async (req, res) => {
         res.status(500).send(error);
     }
 });
+
+// Add new tag
+router.post('/', async (req, res) => {
+    console.log("post req body for tags",req);
+    const tagName = req.body.name;
+
+    if (!tagName) {
+        return res.status(400).send('Tag name is required');
+    }
+
+    try {
+        // Check if the tag already exists
+        const existingTag = await Tag.findOne({ name: tagName });
+        if (existingTag) {
+            return res.status(409).send('Tag already exists');
+        }
+
+        // Create and save the new tag
+        const newTag = new Tag({ name: tagName });
+        await newTag.save();
+
+        res.status(201).json({
+            tid: newTag._id.toString(), // Convert ObjectId to string for consistent API response
+            name: newTag.name
+        });
+    } catch (error) {
+        console.log("Error in adding new tag: ", error);
+        res.status(500).send(error);
+    }
+});
+
 
 // Get a tag by ID
 router.get('/:tagId', async (req, res) => {
@@ -50,6 +82,19 @@ router.get('/name/:tagName', async (req, res) => {
         res.json(transformedTag);
     } catch (error) {
         console.log("Error in fetching tag by name: ", error);
+        res.status(500).send(error);
+    }
+});
+
+// Get the number of questions for a specific tag
+router.get('/:tagId/questions/count', async (req, res) => {
+    try {
+        const tagId = req.params.tagId;
+        const questionCount = await Question.countDocuments({ 'tags': tagId });
+
+        res.json({ count: questionCount });
+    } catch (error) {
+        console.log("Error in getting question count for tag:", error);
         res.status(500).send(error);
     }
 });

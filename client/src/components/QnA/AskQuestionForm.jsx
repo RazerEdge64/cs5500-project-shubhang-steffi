@@ -57,6 +57,7 @@ function AskQuestionForm({ setActiveView, setActiveTab }) {
 
         if (isValid) {
             try {
+                console.log("tagsArray - ",tagsArray);
                 const mappedTagIds = await mapTagsToIds(tagsArray); // Ensure this function is async
                 const newQuestion = {
                     title: title,           // Collected from form
@@ -67,6 +68,8 @@ function AskQuestionForm({ setActiveView, setActiveTab }) {
                     ask_date_time: new Date(),
                     views: 0  
                 };
+
+                console.log(newQuestion);
 
                 await addQuestion(newQuestion);
                 // Reset the form and change view only after successful addition

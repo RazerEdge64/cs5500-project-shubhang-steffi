@@ -18,7 +18,7 @@ function QuestionsList({ onQuestionClick, searchString, setActiveView }) {
         async function fetchData() {
             const fetchedTags = await getAllTags();
             setTags(fetchedTags);
-            displayQuestions(sortType);
+            await displayQuestions(sortType);
         }
 
         fetchData();
@@ -121,16 +121,16 @@ function QuestionsList({ onQuestionClick, searchString, setActiveView }) {
     function displayQuestions(sortType) {
         getAllQuestions().then(allQuestions => {
             let sortedQuestions = [...allQuestions];
-
+            console.log("From Q Lists - ",allQuestions);
             switch (sortType) {
                 case 'newest':
-                    sortedQuestions.sort((a, b) => b.askDate - a.askDate);
+                    sortedQuestions.sort((a, b) => new Date(b.askDate) - new Date(a.askDate));
                     break;
                 case 'active':
                     sortedQuestions.sort((a, b) => {
-                        const lastAnswerA = a.ansIds.map(id => getAnswerById(id)).sort((a, b) => b.ansDate - a.ansDate)[0] || {ansDate: a.askDate};
-                        const lastAnswerB = b.ansIds.map(id => getAnswerById(id)).sort((a, b) => b.ansDate - a.ansDate)[0] || {ansDate: b.askDate};
-                        return lastAnswerB.ansDate - lastAnswerA.ansDate;
+                        const lastAnswerA = a.ansIds.map(id => getAnswerById(id)).sort((a, b) => new Date(b.ansDate) - new Date(a.ansDate))[0] || {ansDate: new Date(a.askDate)};
+                        const lastAnswerB = b.ansIds.map(id => getAnswerById(id)).sort((a, b) => new Date(b.ansDate) - new Date(a.ansDate))[0] || {ansDate: new Date(b.askDate)};
+                        return new Date(lastAnswerB.ansDate) - new Date(lastAnswerA.ansDate);
                     });
                     break;
 
@@ -145,6 +145,81 @@ function QuestionsList({ onQuestionClick, searchString, setActiveView }) {
             console.error('Error in displayQuestions: ', error);
         });
     }
+    // async function displayQuestions(sortType) {
+    //     try {
+    //         const allQuestions = await getAllQuestions();
+    //         let sortedQuestions = [...allQuestions];
+    //
+    //         if (sortType === 'active') {
+    //             // const questionAnswerMap = await mapQuestionsToLatestAnswers(allQuestions);
+    //             // sortedQuestions.sort((a, b) => {
+    //             //     const lastAnswerDateA = questionAnswerMap.get(a.id) || new Date(a.askDate);
+    //             //     const lastAnswerDateB = questionAnswerMap.get(b.id) || new Date(b.askDate);
+    //             //     return new Date(lastAnswerDateB) - new Date(lastAnswerDateA);
+    //             // });
+    //
+    //             // const questionAnswerMap = await mapQuestionsToLatestAnswerDates(allQuestions);
+    //             // sortedQuestions.sort((a, b) => questionAnswerMap.get(b.id) - questionAnswerMap.get(a.id));
+    //
+    //             // const questionAnswerMap = await mapQuestionsToLatestAnswerDates(allQuestions);
+    //             // sortedQuestions.sort((a, b) => {
+    //             //     const aDate = questionAnswerMap.get(a.id) || new Date(a.askDate);
+    //             //     const bDate = questionAnswerMap.get(b.id) || new Date(b.askDate);
+    //             //     return bDate - aDate;
+    //             // });
+    //
+    //         } else if (sortType === 'newest') {
+    //             sortedQuestions.sort((a, b) => new Date(b.askDate) - new Date(a.askDate));
+    //         } else if (sortType === 'unanswered') {
+    //             sortedQuestions = sortedQuestions.filter(q => q.ansIds.length === 0);
+    //         }
+    //
+    //         setQuestions(sortedQuestions);
+    //
+    //     } catch (error) {
+    //         console.error('Error in displayQuestions: ', error);
+    //     }
+    // }
+
+    // async function mapQuestionsToLatestAnswers(questions) {
+    //     const latestAnswersPromises = questions.map(async question => {
+    //         const answers = await Promise.all(question.ansIds.map(getAnswerById));
+    //         return {
+    //             questionId: question.id,
+    //             latestAnswer: answers.sort((a, b) => new Date(b.ansDate) - new Date(a.ansDate))[0]
+    //         };
+    //     });
+    //
+    //     const latestAnswers = await Promise.all(latestAnswersPromises);
+    //     const questionAnswerMap = new Map();
+    //     latestAnswers.forEach(item => {
+    //         questionAnswerMap.set(item.questionId, item.latestAnswer ? new Date(item.latestAnswer.ansDate) : null);
+    //     });
+    //
+    //     return questionAnswerMap;
+    // }
+    // async function mapQuestionsToLatestAnswerDates(questions) {
+    //     const questionAnswerMap = new Map();
+    //
+    //     for (const question of questions) {
+    //         if (question.ansIds.length > 0) {
+    //             const answerDates = await Promise.all(question.ansIds.map(async id => {
+    //                 const answer = await getAnswerById(id);
+    //                 return new Date(answer.ansDate);
+    //             }));
+    //             const latestAnswerDate = new Date(Math.max(...answerDates));
+    //             questionAnswerMap.set(question.id, latestAnswerDate);
+    //         } else {
+    //             // For questions without answers, we set a very old date to ensure they come after questions with answers
+    //             questionAnswerMap.set(question.id, new Date(0)); // Date(0) represents 1970-01-01
+    //         }
+    //     }
+    //
+    //     return questionAnswerMap;
+    // }
+
+
+
 
     async function searchAndDisplayQuestions(searchString) {
         const tags = searchString.match(/\[([^\]]+)\]/g) || [];
