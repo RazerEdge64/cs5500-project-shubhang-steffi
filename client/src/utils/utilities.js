@@ -22,4 +22,3 @@ export function formatDate(dateString) {
         return date.toLocaleString('default', options);
     }
 }
-

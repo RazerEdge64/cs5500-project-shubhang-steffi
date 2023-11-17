@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import {getAllQuestions, getTagById, getAnswerById, incrementQuestionViews} from '../../services/dataServices.js';
+import {getAllQuestions, getTagById, getAnswerById, incrementQuestionViews, getAllTags} from '../../services/dataServices.js';
 import { formatDate } from '../../utils/utilities.js';
 import logger from "../../logger/logger";
-import axios from "axios";
 
 function QuestionsList({ onQuestionClick, searchString, setActiveView }) {
 
     const [questions, setQuestions] = useState([]);
+    const [tags, setTags] = useState([]);
     const [sortType, setSortType] = useState('newest');
 
     const headerName = searchString ? "Search Results" : "All Questions";
@@ -15,8 +15,15 @@ function QuestionsList({ onQuestionClick, searchString, setActiveView }) {
 
 
     useEffect(() => {
-        displayQuestions(sortType);
+        async function fetchData() {
+            const fetchedTags = await getAllTags();
+            setTags(fetchedTags);
+            displayQuestions(sortType);
+        }
+
+        fetchData();
     }, [sortType]);
+
 
     useEffect(() => {
         logger.log("searchString changed: "+ searchString);
@@ -26,7 +33,7 @@ function QuestionsList({ onQuestionClick, searchString, setActiveView }) {
         } else {
             displayQuestions(sortType);
         }
-    }, [searchString]);
+    }, [searchString, tags]);
 
     // function handleQuestionClick(question) {
     //
@@ -81,7 +88,6 @@ function QuestionsList({ onQuestionClick, searchString, setActiveView }) {
 
 
 
-
     function createQuestionElement(question) {
         return (
             <div className="question" key={question.qid}>
@@ -97,9 +103,9 @@ function QuestionsList({ onQuestionClick, searchString, setActiveView }) {
                         </div>
                     </div>
                     <div className="postTags">
-                        {question.tagIds.map(tagId => {
-                            const tag = getTagById(tagId);
-                            return <span key={tagId}>{tag.name}</span>;
+                    {question.tagIds.map(tagId => {
+                            const tag = tags.find(t => t.tid === tagId);
+                            return tag ? <span key={tagId}>{tag.name}</span> : null;
                         })}
                     </div>
                 </div>
@@ -140,28 +146,6 @@ function QuestionsList({ onQuestionClick, searchString, setActiveView }) {
         });
     }
 
-    // function searchAndDisplayQuestions(searchString) {
-    //     const tags = searchString.match(/\[([^\]]+)\]/g) || [];
-    //     const words = searchString.replace(/\[([^\]]+)\]/g, '').trim().split(/\s+/).filter(word => word);
-    //
-    //     const filteredQuestions = getAllQuestions().filter(question => {
-    //         const hasMatchingTag = tags.some(tag => {
-    //             const tagName = tag.slice(1, -1).toLowerCase();
-    //             return question.tagIds.some(tagId => getTagById(tagId).name.toLowerCase() === tagName);
-    //         });
-    //
-    //         const hasMatchingWord = words.some(word =>
-    //             question.title.toLowerCase().includes(word.toLowerCase()) ||
-    //             question.text.toLowerCase().includes(word.toLowerCase())
-    //         );
-    //
-    //         return hasMatchingTag || hasMatchingWord;
-    //     });
-    //
-    //     const sortedQuestions = filteredQuestions.sort((a, b) => new Date(b.askDate) - new Date(a.askDate));
-    //
-    //     setQuestions(sortedQuestions);
-    // }
     async function searchAndDisplayQuestions(searchString) {
         const tags = searchString.match(/\[([^\]]+)\]/g) || [];
         const words = searchString.replace(/\[([^\]]+)\]/g, '').trim().split(/\s+/).filter(word => word);
@@ -195,7 +179,6 @@ function QuestionsList({ onQuestionClick, searchString, setActiveView }) {
 
         setQuestions(sortedQuestions);
     }
-
 
     return (
         <div>

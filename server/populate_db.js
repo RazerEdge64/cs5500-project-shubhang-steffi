@@ -67,6 +67,7 @@ const populate = async () => {
   console.log('done');
 }
 
+
 populate()
   .catch((err) => {
     console.log('ERROR: ' + err);
