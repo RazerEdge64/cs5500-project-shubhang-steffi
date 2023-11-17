@@ -72,7 +72,7 @@ router.post('/increment-views/:qid', async (req, res) => {
         question.views += 1; // Increment the views
         await question.save(); // Save the updated question
 
-        res.status(200).send({ message: 'Views incremented successfully' });
+        res.status(200).send({message: 'Views incremented successfully'});
     } catch (error) {
         console.log("Error in incrementing question views:", error);
         res.status(500).send(error);

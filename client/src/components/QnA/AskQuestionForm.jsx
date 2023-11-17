@@ -3,13 +3,12 @@ import { addQuestion, mapTagsToIds } from '../../services/dataServices.js';
 import logger from "../../logger/logger";
 
 function AskQuestionForm({ setActiveView, setActiveTab }) {
-    // Use React state for form fields
+
     const [title, setTitle] = useState('');
     const [text, setText] = useState('');
     const [tags, setTags] = useState('');
     const [username, setUsername] = useState('');
 
-    // Use React state for error messages
     const [titleError, setTitleError] = useState('');
     const [textError, setTextError] = useState('');
     const [tagError, setTagError] = useState('');
@@ -41,7 +40,7 @@ function AskQuestionForm({ setActiveView, setActiveTab }) {
             isValid = false;
         }
 
-        const tagsArray = tags.split(' ').filter(tag => tag); // Filter out empty strings
+        const tagsArray = tags.split(' ').filter(tag => tag);
         if (tagsArray.length > 5) {
             setTagError('Cannot have more than 5 tags');
             isValid = false;
@@ -57,22 +56,21 @@ function AskQuestionForm({ setActiveView, setActiveTab }) {
 
         if (isValid) {
             try {
-                console.log("tagsArray - ",tagsArray);
-                const mappedTagIds = await mapTagsToIds(tagsArray); // Ensure this function is async
+                logger.log("tagsArray - ",tagsArray);
+                const mappedTagIds = await mapTagsToIds(tagsArray);
                 const newQuestion = {
-                    title: title,           // Collected from form
-                    text: text,             // Collected from form
-                    tags: mappedTagIds,     // Result from mapTagsToIds function
-                    answers: [],            // Assuming no answers at the time of creation
-                    asked_by: username,     // Collected from form
+                    title: title,
+                    text: text,
+                    tags: mappedTagIds,
+                    answers: [],
+                    asked_by: username,
                     ask_date_time: new Date(),
                     views: 0  
                 };
 
-                console.log(newQuestion);
+                logger.log(newQuestion);
 
                 await addQuestion(newQuestion);
-                // Reset the form and change view only after successful addition
                 setTitle('');
                 setText('');
                 setTags('');
@@ -80,8 +78,7 @@ function AskQuestionForm({ setActiveView, setActiveTab }) {
                 setActiveView('questions');
                 setActiveTab('questions');
             } catch (error) {
-                console.error('Error posting question:', error);
-                // Display a generic error message or specific based on error content
+                logger.log('Error posting question:', error);
             }
         }
     };

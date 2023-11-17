@@ -5,10 +5,26 @@ Read homework specifications [here](https://northeastern-my.sharepoint.com/:w:/r
 
 In the sections below, list and describe each contribution briefly.
 
-## Team Member 1 Contribution
+## Team Member 1 : Shubhang Kohirkar
+- Home Page/ Questions
+- Add New Questions Page
+- Search Page
+- Tags Page
+- Debugging and Testing
+- Conversion from JS to React
+- Handling links for the new questions
+- API calls for Questions and some Answers.
+- Frontend redesign to support Async methods.
 
-## Team Member 2 Contribution
+## Team Member 2 : Steffi Patel
+- Answers Page
+- Add New Answers Page
+- UML
+- Debugging and Testing
+- Conversion from JS to React
+- Handling links for the answers posted
+- API calls for Tags and some Answers.
+- Frontend redesign to support Async methods. 
 
-*Add your team's class and sequence diagrams to the design directory*. It is enough to document the design of the server. You can assume the client to be an external entity that will trigger events in the server.
-
-You will get 10% extra credit if you implement design patterns and explain how you have used them in this README.
+## Design Patterns
+- We used the **Singleton design pattern** (more on this in the [design README.md](design/README.md)).

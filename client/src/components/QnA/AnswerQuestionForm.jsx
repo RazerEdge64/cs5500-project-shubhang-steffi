@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import {getAllAnswers} from "../../services/dataServices";
 import logger from "../../logger/logger";
 
 function AnswerQuestionForm({ onAnswerSubmit }) {
@@ -55,27 +54,18 @@ function AnswerQuestionForm({ onAnswerSubmit }) {
 
         if (valid) {
             const newAnswer = {
-                // aid: 'a' + (getAllAnswers().length + 1),
                 text: answerText,
                 ans_by: username,
                 ans_date_time: new Date()
             };
 
-            // onAnswerSubmit(newAnswer);
-            //
-            // setUsername('');
-            // setAnswerText('');
             onAnswerSubmit(newAnswer)
                 .then(() => {
-                    // Handle successful submission
                     setUsername('');
                     setAnswerText('');
-                    // Maybe show a success message or navigate to another page
                 })
                 .catch(error => {
-                    // Handle errors
                     console.error('Error submitting answer:', error);
-                    // Maybe show an error message
                 });
 
         }

@@ -21,7 +21,6 @@ router.get('/', async (req, res) => {
 
 // Add new tag
 router.post('/', async (req, res) => {
-    console.log("post req body for tags",req);
     const tagName = req.body.name;
 
     if (!tagName) {
@@ -29,13 +28,11 @@ router.post('/', async (req, res) => {
     }
 
     try {
-        // Check if the tag already exists
         const existingTag = await Tag.findOne({ name: tagName });
         if (existingTag) {
             return res.status(409).send('Tag already exists');
         }
 
-        // Create and save the new tag
         const newTag = new Tag({ name: tagName });
         await newTag.save();
 
@@ -73,7 +70,6 @@ router.get('/name/:tagName', async (req, res) => {
             return res.status(404).send('Tag not found');
         }
 
-        // Transform the tag object if necessary
         const transformedTag = {
             tid: tag._id.toString(), // Convert ObjectId to string
             name: tag.name
@@ -85,6 +81,7 @@ router.get('/name/:tagName', async (req, res) => {
         res.status(500).send(error);
     }
 });
+
 
 // Get the number of questions for a specific tag
 router.get('/:tagId/questions/count', async (req, res) => {

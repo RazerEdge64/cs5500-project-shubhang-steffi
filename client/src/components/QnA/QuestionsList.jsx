@@ -13,7 +13,6 @@ function QuestionsList({ onQuestionClick, searchString, setActiveView }) {
 
     logger.log("searchString " + searchString);
 
-
     useEffect(() => {
         async function fetchData() {
             const fetchedTags = await getAllTags();
@@ -35,44 +34,11 @@ function QuestionsList({ onQuestionClick, searchString, setActiveView }) {
         }
     }, [searchString, tags]);
 
-    // function handleQuestionClick(question) {
-    //
-    //     console.log("handle Question");
-    //     question.views++;
-    //
-    //     const updatedQuestions = questions.map(q => {
-    //         if (q.qid === question.qid) {
-    //             return question;
-    //         }
-    //         return q;
-    //     });
-    //     setQuestions(updatedQuestions);
-    //
-    //     if (onQuestionClick) {
-    //         onQuestionClick(question.qid);
-    //     }
-    // }
-    // async function handleQuestionClick(question) {
-    //     // ... existing code for handling question click ...
-    //
-    //     try {
-    //         // Call the API to increment the question views
-    //         await axios.post(`http://localhost:8000/questions/increment-views/${question.qid}`);
-    //         console.log("Views incremented for question:", question.qid);
-    //
-    //         // Optionally, update the UI to reflect the new view count
-    //         // This could involve re-fetching the question data or incrementing the view count in the state
-    //     } catch (error) {
-    //         console.error('Error incrementing views:', error);
-    //     }
-    // }
     async function handleQuestionClick(question) {
-        console.log("handle Question");
+        logger.log("handle Question");
 
-        // Call the function to increment views
         await incrementQuestionViews(question.qid);
 
-        // Update the local state to reflect the new view count
         const updatedQuestions = questions.map(q => {
             if (q.qid === question.qid) {
                 return { ...question, views: question.views + 1 };
@@ -85,7 +51,6 @@ function QuestionsList({ onQuestionClick, searchString, setActiveView }) {
             onQuestionClick(question.qid);
         }
     }
-
 
 
     function createQuestionElement(question) {
@@ -121,7 +86,7 @@ function QuestionsList({ onQuestionClick, searchString, setActiveView }) {
     function displayQuestions(sortType) {
         getAllQuestions().then(allQuestions => {
             let sortedQuestions = [...allQuestions];
-            console.log("From Q Lists - ",allQuestions);
+            logger.log("From Q Lists - ",allQuestions);
             switch (sortType) {
                 case 'newest':
                     sortedQuestions.sort((a, b) => new Date(b.askDate) - new Date(a.askDate));
@@ -142,84 +107,9 @@ function QuestionsList({ onQuestionClick, searchString, setActiveView }) {
             setQuestions(sortedQuestions);
 
         }).catch(error => {
-            console.error('Error in displayQuestions: ', error);
+            logger.log('Error in displayQuestions: ', error);
         });
     }
-    // async function displayQuestions(sortType) {
-    //     try {
-    //         const allQuestions = await getAllQuestions();
-    //         let sortedQuestions = [...allQuestions];
-    //
-    //         if (sortType === 'active') {
-    //             // const questionAnswerMap = await mapQuestionsToLatestAnswers(allQuestions);
-    //             // sortedQuestions.sort((a, b) => {
-    //             //     const lastAnswerDateA = questionAnswerMap.get(a.id) || new Date(a.askDate);
-    //             //     const lastAnswerDateB = questionAnswerMap.get(b.id) || new Date(b.askDate);
-    //             //     return new Date(lastAnswerDateB) - new Date(lastAnswerDateA);
-    //             // });
-    //
-    //             // const questionAnswerMap = await mapQuestionsToLatestAnswerDates(allQuestions);
-    //             // sortedQuestions.sort((a, b) => questionAnswerMap.get(b.id) - questionAnswerMap.get(a.id));
-    //
-    //             // const questionAnswerMap = await mapQuestionsToLatestAnswerDates(allQuestions);
-    //             // sortedQuestions.sort((a, b) => {
-    //             //     const aDate = questionAnswerMap.get(a.id) || new Date(a.askDate);
-    //             //     const bDate = questionAnswerMap.get(b.id) || new Date(b.askDate);
-    //             //     return bDate - aDate;
-    //             // });
-    //
-    //         } else if (sortType === 'newest') {
-    //             sortedQuestions.sort((a, b) => new Date(b.askDate) - new Date(a.askDate));
-    //         } else if (sortType === 'unanswered') {
-    //             sortedQuestions = sortedQuestions.filter(q => q.ansIds.length === 0);
-    //         }
-    //
-    //         setQuestions(sortedQuestions);
-    //
-    //     } catch (error) {
-    //         console.error('Error in displayQuestions: ', error);
-    //     }
-    // }
-
-    // async function mapQuestionsToLatestAnswers(questions) {
-    //     const latestAnswersPromises = questions.map(async question => {
-    //         const answers = await Promise.all(question.ansIds.map(getAnswerById));
-    //         return {
-    //             questionId: question.id,
-    //             latestAnswer: answers.sort((a, b) => new Date(b.ansDate) - new Date(a.ansDate))[0]
-    //         };
-    //     });
-    //
-    //     const latestAnswers = await Promise.all(latestAnswersPromises);
-    //     const questionAnswerMap = new Map();
-    //     latestAnswers.forEach(item => {
-    //         questionAnswerMap.set(item.questionId, item.latestAnswer ? new Date(item.latestAnswer.ansDate) : null);
-    //     });
-    //
-    //     return questionAnswerMap;
-    // }
-    // async function mapQuestionsToLatestAnswerDates(questions) {
-    //     const questionAnswerMap = new Map();
-    //
-    //     for (const question of questions) {
-    //         if (question.ansIds.length > 0) {
-    //             const answerDates = await Promise.all(question.ansIds.map(async id => {
-    //                 const answer = await getAnswerById(id);
-    //                 return new Date(answer.ansDate);
-    //             }));
-    //             const latestAnswerDate = new Date(Math.max(...answerDates));
-    //             questionAnswerMap.set(question.id, latestAnswerDate);
-    //         } else {
-    //             // For questions without answers, we set a very old date to ensure they come after questions with answers
-    //             questionAnswerMap.set(question.id, new Date(0)); // Date(0) represents 1970-01-01
-    //         }
-    //     }
-    //
-    //     return questionAnswerMap;
-    // }
-
-
-
 
     async function searchAndDisplayQuestions(searchString) {
         const tags = searchString.match(/\[([^\]]+)\]/g) || [];
@@ -227,7 +117,6 @@ function QuestionsList({ onQuestionClick, searchString, setActiveView }) {
 
         const allQuestions = await getAllQuestions();
 
-        // Map each question to a promise that resolves to true or false
         const questionPromises = allQuestions.map(async question => {
             const hasMatchingTag = await Promise.all(tags.map(async tag => {
                 const tagName = tag.slice(1, -1).toLowerCase();
@@ -245,7 +134,6 @@ function QuestionsList({ onQuestionClick, searchString, setActiveView }) {
             return hasMatchingTag || hasMatchingWord;
         });
 
-        // Wait for all promises to resolve and filter the questions
         const filteredQuestions = (await Promise.all(questionPromises))
             .map((matches, index) => matches ? allQuestions[index] : null)
             .filter(question => question !== null);

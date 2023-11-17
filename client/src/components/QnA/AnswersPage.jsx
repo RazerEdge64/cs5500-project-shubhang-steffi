@@ -1,28 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { getQuestionById, getAnswerById } from '../../services/dataServices.js';
+import { getQuestionById } from '../../services/dataServices.js';
 import { formatDate } from '../../utils/utilities.js';
 import logger from "../../logger/logger";
 
 function AnswersPage({ questionId, setActiveView }) {
-    console.log("questionID - ",questionId);
+    logger.log("questionID - ",questionId);
     const [question, setQuestion] = useState(null);
     const [answers, setAnswers] = useState([]);
 
     useEffect(() => {
-        console.log(answers);
+        logger.log(answers);
     }, [answers]);
 
     useEffect(() => {
         async function fetchData() {
             try {
                 const fetchedQuestion = await getQuestionById(questionId);
-                console.log(fetchedQuestion);
+                logger.log(fetchedQuestion);
                 if (fetchedQuestion) {
                     setQuestion(fetchedQuestion);
 
-                    // Check if answers are already included in the fetched question
                     if (fetchedQuestion.answers && fetchedQuestion.answers.length > 0) {
-                        // Sort the answers by date
                         const sortedAnswers = fetchedQuestion.answers.sort((a, b) => new Date(b.ans_date_time) - new Date(a.ans_date_time));
                         setAnswers(sortedAnswers);
                     }
@@ -30,13 +28,12 @@ function AnswersPage({ questionId, setActiveView }) {
                     logger.log("Fetched answers for question " + questionId + ":" + JSON.stringify(fetchedQuestion.answers));
                 }
             } catch (error) {
-                console.error('Error fetching question or answers:', error);
+                logger.log('Error fetching question or answers:', error);
             }
         }
 
         fetchData();
     }, [questionId]);
-
 
 
     const handleAnswerClick = () => {
