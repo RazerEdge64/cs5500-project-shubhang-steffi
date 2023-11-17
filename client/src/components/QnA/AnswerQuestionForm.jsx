@@ -24,6 +24,9 @@ function AnswerQuestionForm({ onAnswerSubmit }) {
         if (!answerText.trim()) {
             valid = false;
             setTextError('Answer text cannot be empty');
+        } else if (answerText.includes('](http')) {
+            valid = false;
+            setTextError('Invalid hyperlink in the answer text');
         } else {
             const regex = /\s*\[([^\]]+)\]\s*\(\s*([^)]+)\s*\)/g;
             const matches = answerText.match(regex);

@@ -36,6 +36,9 @@ function AskQuestionForm({ setActiveView, setActiveTab }) {
         if (!text) {
             setTextError('Question text cannot be empty');
             isValid = false;
+        } else if (text.includes('](http')) {
+            setTextError('Invalid hyperlink in the question text');
+            isValid = false;
         }
 
         const tagsArray = tags.split(' ').filter(tag => tag); // Filter out empty strings
