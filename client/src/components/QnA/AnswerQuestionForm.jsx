@@ -23,34 +23,26 @@ function AnswerQuestionForm({ onAnswerSubmit }) {
         if (!answerText.trim()) {
             valid = false;
             setTextError('Answer text cannot be empty');
-        } else if (answerText.includes('](http')) {
-            valid = false;
-            setTextError('Invalid hyperlink in the answer text');
         } else {
-            const regex = /\s*\[([^\]]+)\]\s*\(\s*([^)]+)\s*\)/g;
-            const matches = answerText.match(regex);
-
+            const hyperlinkRegex = /\[([^\]]+)\]\((https:\/\/[^)]+)\)/g;
+            let match;
             let invalidLinkFound = false;
 
-            if (matches) {
-                for (const match of matches) {
-                    const linkText = match.match(/\[([^\]]+)\]/)[1];
-                    const linkTarget = match.match(/\(([^)]+)\)/)[1];
-
-                    if (!linkText.trim() || !linkTarget.trim() || !linkTarget.startsWith('https://')) {
-                        invalidLinkFound = true;
-                        break;
-                    }
+            while ((match = hyperlinkRegex.exec(answerText)) !== null) {
+                if (match[1].trim() === '' || match[2].trim() === '') {
+                    invalidLinkFound = true;
+                    break;
                 }
             }
 
-            if (invalidLinkFound) {
+            if (invalidLinkFound || (answerText.includes('[') && !hyperlinkRegex.test(answerText))) {
                 valid = false;
                 setTextError('Invalid hyperlink');
             } else {
                 setTextError('');
             }
         }
+
 
         if (valid) {
             const newAnswer = {

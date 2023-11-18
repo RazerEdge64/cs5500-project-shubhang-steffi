@@ -96,7 +96,61 @@ router.get('/:questionId/with-answers-count', async (req, res) => {
     }
 });
 
-module.exports = router;
+
+// Endpoint to get questions sorted by most recent answer activity
+router.get('/sorted/active', async (req, res) => {
+    try {
+        let questions = await Question.find({}).populate('answers');
+
+        questions.sort((a, b) => {
+
+            console.log(`Question A Answers: ${a.answers.length}, Question B Answers: ${b.answers.length}`);
+
+            const hasAnswersA = a.answers.length > 0;
+            const hasAnswersB = b.answers.length > 0;
+
+            if (hasAnswersA && !hasAnswersB) return -1;
+            if (!hasAnswersA && hasAnswersB) return 1;
+
+            const latestAnswerDateA = hasAnswersA
+                ? new Date(Math.max(...a.answers.map(ans => new Date(ans.ans_date_time).getTime())))
+                : new Date(a.ask_date_time);
+
+            const latestAnswerDateB = hasAnswersB
+                ? new Date(Math.max(...b.answers.map(ans => new Date(ans.ans_date_time).getTime())))
+                : new Date(b.ask_date_time);
+
+            return latestAnswerDateB - latestAnswerDateA;
+        });
+        // const latestActivityMap = {};
+        //
+        // for (const question of questions) {
+        //     const questionId = question._id.toString();
+        //     let latestActivityDate = new Date(question.ask_date_time).getTime(); // Default to ask date
+        //
+        //     for (const answer of question.answers) {
+        //         const answerDate = new Date(answer.ans_date_time).getTime();
+        //         if (answerDate > latestActivityDate) {
+        //             latestActivityDate = answerDate;
+        //         }
+        //     }
+        //
+        //     latestActivityMap[questionId] = latestActivityDate;
+        // }
+        //
+        // questions.sort((a, b) => {
+        //     const aId = a._id.toString();
+        //     const bId = b._id.toString();
+        //     return latestActivityMap[bId] - latestActivityMap[aId];
+        // });
+        //
+        //
+        res.json(questions);
+    } catch (error) {
+        console.error("Error fetching actively sorted questions:", error);
+        res.status(500).send(error);
+    }
+});
 
 
 module.exports = router;

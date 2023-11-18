@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {getAllQuestions, getTagById, getAnswerById, incrementQuestionViews, getAllTags} from '../../services/dataServices.js';
+import {getAllQuestions, getTagById, getAnswerById, incrementQuestionViews, getAllTags, getQuestionsSortedByActive} from '../../services/dataServices.js';
 import { formatDate } from '../../utils/utilities.js';
 import logger from "../../logger/logger";
 
@@ -84,25 +84,31 @@ function QuestionsList({ onQuestionClick, searchString, setActiveView }) {
 
 
     function displayQuestions(sortType) {
-        getAllQuestions().then(allQuestions => {
+        getAllQuestions().then(async allQuestions => {
             let sortedQuestions = [...allQuestions];
-            logger.log("From Q Lists - ",allQuestions);
+            logger.log("From Q Lists - ", allQuestions);
             switch (sortType) {
                 case 'newest':
                     sortedQuestions.sort((a, b) => new Date(b.askDate) - new Date(a.askDate));
                     break;
                 case 'active':
-                    sortedQuestions.sort((a, b) => {
-                        const lastAnswerA = a.ansIds.map(id => getAnswerById(id)).sort((a, b) => new Date(b.ansDate) - new Date(a.ansDate))[0] || {ansDate: new Date(a.askDate)};
-                        const lastAnswerB = b.ansIds.map(id => getAnswerById(id)).sort((a, b) => new Date(b.ansDate) - new Date(a.ansDate))[0] || {ansDate: new Date(b.askDate)};
-                        return new Date(lastAnswerB.ansDate) - new Date(lastAnswerA.ansDate);
+                    // sortedQuestions.sort((a, b) => {
+                    //     const lastAnswerA = a.ansIds.map(id => getAnswerById(id)).sort((a, b) => new Date(b.ansDate) - new Date(a.ansDate))[0] || {ansDate: new Date(a.askDate)};
+                    //     const lastAnswerB = b.ansIds.map(id => getAnswerById(id)).sort((a, b) => new Date(b.ansDate) - new Date(a.ansDate))[0] || {ansDate: new Date(b.askDate)};
+                    //     console.log(lastAnswerA);
+                    //     console.log(lastAnswerB);
+                    //     return lastAnswerB.ansDate - lastAnswerA.ansDate;
+                    // });
+                    await getQuestionsSortedByActive().then(sortedQuestions => {
+                        setQuestions(sortedQuestions);
+                    }).catch(error => {
+                        logger.log('Error fetching actively sorted questions:', error);
                     });
-                    break;
 
+                    break;
                 case 'unanswered':
                     sortedQuestions = sortedQuestions.filter(q => q.ansIds.length === 0);
                     break;
-
             }
             setQuestions(sortedQuestions);
 

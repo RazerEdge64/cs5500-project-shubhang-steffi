@@ -32,13 +32,30 @@ function AskQuestionForm({ setActiveView, setActiveTab }) {
             isValid = false;
         }
 
+        // Validate text
         if (!text) {
             setTextError('Question text cannot be empty');
             isValid = false;
-        } else if (text.includes('](http')) {
-            setTextError('Invalid hyperlink in the question text');
-            isValid = false;
+        } else {
+            const hyperlinkRegex = /\[([^\]]+)\]\((https:\/\/[^)]+)\)/g;
+            let match;
+            let invalidLinkFound = false;
+
+            while ((match = hyperlinkRegex.exec(text)) !== null) {
+                // Check if either Link Text or URL is empty or URL doesn't start with https://
+                if (match[1].trim() === '' || match[2].trim() === '' || !match[2].startsWith('https://')) {
+                    invalidLinkFound = true;
+                    break;
+                }
+            }
+
+            if (invalidLinkFound || (text.includes('[') && !hyperlinkRegex.test(text))) {
+                setTextError('Invalid hyperlink');
+                isValid = false;
+            }
         }
+
+
 
         const tagsArray = tags.split(' ').filter(tag => tag);
         if (tagsArray.length > 5) {
@@ -56,7 +73,7 @@ function AskQuestionForm({ setActiveView, setActiveTab }) {
 
         if (isValid) {
             try {
-                logger.log("tagsArray - ",tagsArray);
+                console.log("tagsArray - ",tagsArray);
                 const mappedTagIds = await mapTagsToIds(tagsArray);
                 const newQuestion = {
                     title: title,

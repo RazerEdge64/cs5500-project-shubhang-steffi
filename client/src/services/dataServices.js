@@ -38,6 +38,16 @@ export async function addQuestion(question) {
     }
 }
 
+export async function getQuestionsSortedByActive() {
+    try {
+        const response = await axios.get('http://localhost:8000/questions/sorted/active');
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching questions sorted by active:', error);
+        return [];
+    }
+}
+
 export async function incrementQuestionViews(qid) {
     try {
         await axios.post(`http://localhost:8000/questions/increment-views/${qid}`);
@@ -72,32 +82,35 @@ export async function getTagById(id) {
 
 export async function mapTagsToIds(tags) {
     const tagIds = [];
+    const baseURL = 'http://localhost:8000'; // Replace with your server URL
 
     for (const tagName of tags) {
-        console.log("mapTagsToIds tagname - ",tagName);
         try {
-            // Checking if the tag exists
-            let response;
+            let tagResponse;
+
             try {
-                response = await axios.get(`/tags/name/${tagName}`);
+                tagResponse = await axios.get(`${baseURL}/tags/name/${tagName}`);
             } catch (error) {
                 if (error.response && error.response.status === 404) {
-                    console.log("tag doesn't exist, creating new one");
-                    response = await axios.post('http://localhost:8000/tags', { name: tagName });
-
+                    tagResponse = await axios.post(`${baseURL}/tags`, { name: tagName });
                 } else {
-                    console.log(error);
+                    throw error;
                 }
             }
 
-            const tag = response.data;
-            tagIds.push(tag.tid);
+            if (tagResponse.data && tagResponse.data.tid) {
+                tagIds.push(tagResponse.data.tid);
+            }
         } catch (error) {
-            console.error('Error in mapTagsToIds: ', error);
+            console.error('Error in mapTagsToIds:', error);
         }
     }
+
+    console.log("maptags to ids - ",tagIds);
+
     return tagIds;
 }
+
 
 export async function getQuestionCountForTag(tagId) {
     try {
